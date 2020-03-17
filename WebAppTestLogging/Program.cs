@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Events;
 
 namespace WebAppTestLogging
 {
@@ -8,8 +9,7 @@ namespace WebAppTestLogging
     {
         public static void Main(string[] args)
         {
-            LoggingApp.StartWith(() =>
-                CreateHostBuilder(args).Build().Run());
+            CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -18,7 +18,12 @@ namespace WebAppTestLogging
                 {
                     webBuilder
                         .UseStartup<Startup>()
-                        .UseSerilog();
+                        .UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+                            .MinimumLevel.Verbose()
+                            .WriteTo.Console()
+                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                            .MinimumLevel.Override("System", LogEventLevel.Information)
+                            .Enrich.FromLogContext());
                 });
     }
 }

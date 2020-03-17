@@ -14,6 +14,8 @@ namespace WebAppTestLogging
 {
     public class Startup
     {
+        private ILogger<Startup> _logger;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -24,8 +26,17 @@ namespace WebAppTestLogging
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            AddClient<GoogleClient>(services, new Uri("http://www.google.com"));
+            _logger = services.BuildServiceProvider().GetService<ILogger<Startup>>();
+            try
+            {
+                services.AddControllers();
+                AddClient<GoogleClient>(services, new Uri("http://www.google.com"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, $"Error during {nameof(ConfigureServices)}");
+                throw;
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,6 +61,7 @@ namespace WebAppTestLogging
 
         private static void AddClient<T>(IServiceCollection services, Uri apiAddress) where T : class
         {
+            throw null;
             services
                 .AddHttpClient<T>()
                 .ConfigureHttpClient((sp, client) =>
